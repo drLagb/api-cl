@@ -5,8 +5,8 @@ from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 import math
 import os
 import matplotlib.pyplot as plt
-from bibliotecas import Velocidad_corte_segundoxmetro, Valor_lamina_m2
-from errors import NotClosedFiguredException, AuditorException, InterpoleFigureError
+from src.utils.bibliotecas import Velocidad_corte_segundoxmetro, Valor_lamina_m2
+from src.utils.errors import NotClosedFiguredException, AuditorException, InterpoleFigureException
 
 class DXFGraphic:
     def __init__(self, entity):
@@ -191,10 +191,10 @@ class DXFAnalyzer:
                 continue
             for point in figure.get_points():
                 if not self.pointIntoFigure(point[:2], externalLine):
-                    raise InterpoleFigureError()
+                    raise InterpoleFigureException()
             for _figure in cola:#here
                 if id(_figure) != id(figure) and id(externalLine) != id(_figure) and self.traslateFigure(figure, _figure):
-                    raise InterpoleFigureError()
+                    raise InterpoleFigureException()
                 
 
     def draw_dxf(self, filePath:str):
