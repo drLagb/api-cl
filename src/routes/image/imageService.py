@@ -4,6 +4,7 @@ from src.utils.errors import FileNotExistException
 from os import path, remove
 from hashlib import md5
 from fastapi import status
+from src.routes.image.entity import MenssajeEntity, ImageEntity
 class ImageService:
     
     def __init__(self):
@@ -33,12 +34,12 @@ class ImageService:
             remove(imagepath)
             remove(filePath)
             return JSONResponse(
-                content={"message":"successful"}, 
+                content=MenssajeEntity("successful").__dict__, 
                 status_code=status.HTTP_202_ACCEPTED
                 )
         except Exception as e:
             return JSONResponse(
-                content={"message":str(e)}, 
+                content=MenssajeEntity("successful").__dict__, 
                 status_code=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -52,7 +53,7 @@ class ImageService:
             imagepath = path.join(imagesPath, f"{id}.jpg")
             if path.exists(filePath):
                 return JSONResponse(
-                    content={"message":"success", "id":id}, 
+                    content=ImageEntity("success", id).__dict__, 
                     status_code=status.HTTP_200_OK
                     )
             with open(filePath, "wb") as File:
@@ -60,17 +61,17 @@ class ImageService:
             dxf = DXFAnalyzer(filePath)
             dxf.draw_dxf(imagepath)
             return JSONResponse(
-                content={"message":"success", "id":id}, 
+                content=ImageEntity("success", id).__dict__, 
                 status_code=status.HTTP_201_CREATED
                 )
         except IOError as e:
             return JSONResponse(
-                content={"message":"El formato no es compatible"}, 
+                content=MenssajeEntity("El formato no es compatible"), 
                 status_code=status.HTTP_406_NOT_ACCEPTABLE
                 )
         except Exception as e:
             return JSONResponse(
-                content={"message":str(e)}, 
+                content=MenssajeEntity(str(e)), 
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         finally:

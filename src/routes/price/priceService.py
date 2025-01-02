@@ -35,7 +35,7 @@ class PriceService:
         except Exception as e:
             raise e
         
-    async def getPriceSha256(reference:str, mount:str, PlainTextResponse):
+    async def getPriceSha256(self, reference:str, mount:str, PlainTextResponse):
         try:
             mensage = f"{reference}{mount}{fiat}{integrityKey}"
             return PlainTextResponse(content=sha256(mensage.encode()).hexdigest(), status_code=status.HTTP_200_OK)

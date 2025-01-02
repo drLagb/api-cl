@@ -10,6 +10,6 @@ priceService = PriceService()
 def get_price(id:str, material:str, thickness:str, amount:int):
     return priceService.get_price(id, material, thickness, amount, JSONResponse)
 
-@priceRouter.get("/price/{reference}/{mount}")
+@priceRouter.get("/{reference}/{mount}")
 async def getPriceSha256(reference:str, mount:str):
-    return priceService.getPriceSha256(reference, mount, PlainTextResponse)
+    return await priceService.getPriceSha256(reference, mount, PlainTextResponse)
