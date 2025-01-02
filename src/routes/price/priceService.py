@@ -20,7 +20,7 @@ class PriceService:
             if info == None:
                 info = MaterialLibrary.get_material_from_dicts(material, thickness)
                 if info == None:
-                    raise MaterialNotExistException
+                    raise MaterialNotExistException()
                 self.MATERIALS.add_material(info)
             calculator = Calculator(dxf, self.MATERIALS)
             price:float = ceil(calculator.calculate_price(info, amount)*100)
@@ -31,13 +31,13 @@ class PriceService:
                     price,
                     calculator.dxf_analyzer.calculate_perimeter(),
                     ""
-                ), status_code=status.HTTP_200_OK)
+                ).__dict__, status_code=status.HTTP_200_OK)
         except Exception as e:
             raise e
         
-    async def getPriceSha256(reference:str, mount:str):
+    async def getPriceSha256(reference:str, mount:str, PlainTextResponse):
         try:
             mensage = f"{reference}{mount}{fiat}{integrityKey}"
-            return sha256(mensage.encode()).hexdigest()
+            return PlainTextResponse(content=sha256(mensage.encode()).hexdigest(), status_code=status.HTTP_200_OK)
         except Exception as e:
             raise e

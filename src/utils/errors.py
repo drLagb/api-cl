@@ -2,7 +2,8 @@ ERRORS_DIC = {
     "NotClosedFiguredException":"La figura no esta cerrada correctamente",
     "AuditorException": "El archivos tiene errores irrecuperables",
     "InterpoleFigureException": "La figura esta solapada en otra",
-    "MaterialNotExistException": "El material a consultar no existe en la base de datos"
+    "MaterialNotExistException": "El material a consultar no existe en la base de datos",
+    "FileNotExistException":"El archivo que esta buscando no se ha encontrado"
 }
 class NotClosedFiguredException(Exception):
     def __init__(self, mensaje:str=ERRORS_DIC.get("NotClosedFiguredException")):
@@ -18,4 +19,8 @@ class AuditorException(Exception):
 
 class MaterialNotExistException(Exception):
     def __init__(self, mensaje:str=ERRORS_DIC.get("MaterialNotExistException")):
+        super().__init__(mensaje)
+        
+class FileNotExistException(Exception):
+    def __init__(self, mensaje:str=ERRORS_DIC.get("FileNotExistException")):
         super().__init__(mensaje)
