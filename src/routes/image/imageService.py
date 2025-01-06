@@ -13,8 +13,11 @@ class ImageService:
     def get_image(self, id:str, FileResponse, JSONResponse):
         try:
             imagepath = path.join(imagesPath, f"{id}.jpg")
+            filePath = path.join(filesPath, f"{id}.dxf")
             if not path.exists(imagepath):
-                return FileNotExistException
+                if not path.exists(filePath):
+                    raise FileNotExistException()
+                self.create_image(filePath, imagepath)
             return FileResponse(
                     imagepath, 
                     status_code=status.HTTP_200_OK, 
@@ -42,15 +45,14 @@ class ImageService:
                 content=MenssajeEntity("successful").__dict__, 
                 status_code=status.HTTP_400_BAD_REQUEST
                 )
-            
-    async def create_image(self, uploaded, JSONResponse):
+
+    async def create_file(self, uploaded, JSONResponse):
         try:
             if uploaded == None:
                 raise FileNotExistException()
             content = await uploaded.read()
             id = md5(content).hexdigest()
             filePath = path.join(filesPath, f"{id}.dxf")
-            imagepath = path.join(imagesPath, f"{id}.jpg")
             if path.exists(filePath):
                 return JSONResponse(
                     content=ImageEntity("success", id).__dict__, 
@@ -58,8 +60,7 @@ class ImageService:
                     )
             with open(filePath, "wb") as File:
                 File.write(content)
-            dxf = DXFAnalyzer(filePath)
-            dxf.draw_dxf(imagepath)
+            DXFAnalyzer(filePath)
             return JSONResponse(
                 content=ImageEntity("success", id).__dict__, 
                 status_code=status.HTTP_201_CREATED
@@ -74,6 +75,7 @@ class ImageService:
                 content=MenssajeEntity(str(e)), 
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-        finally:
-            if(path.exists(filePath) and not path.exists(imagepath)):
-                remove(filePath)
+            
+    def create_image(self, filePath, imagepath):
+        dxf = DXFAnalyzer(filePath, verifible=False)
+        dxf.draw_dxf(imagepath)
