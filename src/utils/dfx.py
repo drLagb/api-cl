@@ -251,7 +251,7 @@ class Calculator:
                 discount = 10
             elif amount >= 5:
                 discount = 5
-            final_price = (cutting_time * 500) + (material_cost * (1 - discount / 100))
+            final_price = (cutting_time * 400) + (material_cost * (1 - discount / 100))
             return final_price * amount
         else:
             return -1
