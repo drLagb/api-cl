@@ -5,6 +5,7 @@ from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 import math
 import os
 import matplotlib.pyplot as plt
+from utils import minBuyValue
 from src.utils.bibliotecas import Velocidad_corte_segundoxmetro, Valor_lamina_m2
 from src.utils.errors import NotClosedFiguredException, AuditorException, InterpoleFigureException
 
@@ -192,7 +193,7 @@ class DXFAnalyzer:
             for point in figure.get_points():
                 if not self.pointIntoFigure(point[:2], externalLine):
                     raise InterpoleFigureException()
-            for _figure in cola:#here
+            for _figure in cola:
                 if id(_figure) != id(figure) and id(externalLine) != id(_figure) and self.traslateFigure(figure, _figure):
                     raise InterpoleFigureException()
                 
@@ -240,19 +241,22 @@ class Calculator:
         self.dxf_analyzer = dxf_analyzer
         self.material_library = material_library
 
+    def magancyMargin(self, price):
+        pass
+
     def calculate_price(self, material:Material, amount:int):
         perimeter = self.dxf_analyzer.calculate_perimeter()
         material_area = self.dxf_analyzer.getArea()/1000000
         if material:
-            cutting_time = perimeter / 1000 * material.cutting_speed 
+            cutting_time = (perimeter / 1000) * material.cutting_speed 
             material_cost = material_area * material.sheet_value
             discount = 0
             if amount >= 10:
                 discount = 10
             elif amount >= 5:
                 discount = 5
-            final_price = (cutting_time * 500) + (material_cost * (1 - discount / 100))
-            return final_price * amount
+            final_price = ((cutting_time * 500) + (material_cost * (1 - discount / 100)))*amount
+            return max(final_price, minBuyValue)
         else:
             return -1
 
