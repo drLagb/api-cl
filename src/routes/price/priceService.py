@@ -15,14 +15,14 @@ class PriceService:
         try:
             thickness = thickness.replace("x", "/")
             filePath = path.join(filesPath, f"{id}.dxf")
-            dxf = DXFAnalyzer(filePath, verifible=False)
+            dxf = DXFAnalyzer(filePath)
             info:Material = self.MATERIALS.get_material(material, thickness)
             if info == None:
                 info = MaterialLibrary.get_material_from_dicts(material, thickness)
                 if info == None:
                     raise MaterialNotExistException()
                 self.MATERIALS.add_material(info)
-            calculator = Calculator(dxf, self.MATERIALS)
+            calculator = Calculator(dxf)
             price:float = ceil(calculator.calculate_price(info, amount)*100)
             return JSONResponse(
                 content=PriceEntity(

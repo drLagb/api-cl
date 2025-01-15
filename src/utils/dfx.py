@@ -5,8 +5,8 @@ from ezdxf.addons.drawing.matplotlib import MatplotlibBackend
 import math
 import os
 import matplotlib.pyplot as plt
-from utils import minBuyValue
-from src.utils.bibliotecas import Velocidad_corte_segundoxmetro, Valor_lamina_m2
+from src.utils import minBuyValue
+from src.utils.bibliotecas import Velocidad_corte_segundoxmetro, Valor_lamina_m2, biblioteca
 from src.utils.errors import NotClosedFiguredException, AuditorException, InterpoleFigureException
 
 class DXFGraphic:
@@ -80,6 +80,32 @@ class DXFElipse(DXFGraphic):
         return perimeter
 
 class DXFAnalyzer:
+
+    unitsToMeters = {
+        0: None,  # Unidades sin definir
+        1: 0.0254,  # Pulgadas a metros
+        2: 0.3048,  # Pies a metros
+        3: 1609.34,  # Millas a metros
+        4: 0.001,  # Milímetros a metros
+        5: 0.01,  # Centímetros a metros
+        6: 1.0,  # Metros
+        7: 1000.0,  # Kilómetros a metros
+        8: 2.54e-08,  # Micro-pulgadas a metros
+        9: 2.54e-05,  # Mils a metros
+        10: 0.9144,  # Yardas a metros
+        11: 1e-10,  # Ángstroms a metros
+        12: 1e-09,  # Nanómetros a metros
+        13: 1e-06,  # Micrones a metros
+        14: 0.1,  # Decímetros a metros
+        15: 10.0,  # Decámetros a metros
+        16: 100.0,  # Hectómetros a metros
+        17: 1e+09,  # Gigámetros a metros
+        18: 1.495978707e+11,  # Unidades astronómicas a metros
+        19: 9.461e+15,  # Años luz a metros
+        20: 3.086e+16,  # Parsecs a metros
+}
+
+
     @staticmethod
     def create():
         MATERIALES:MaterialLibrary = MaterialLibrary()
@@ -87,21 +113,17 @@ class DXFAnalyzer:
             MATERIALES.add_material(Material())
         return MATERIALES
 
-    def __init__(self, file_path, verifible:bool = True):
+    def __init__(self, file_path):
         self.file_path = file_path
-        self.doc, auditor = recover.readfile(self.file_path)
+        self.doc, self.auditor = recover.readfile(self.file_path)
         self.msp = self.doc.modelspace()
-        if not verifible:
-            return
-        if auditor.has_errors:
-            raise AuditorException()
-        self.verifyFile()
+        self.convertion = DXFAnalyzer.unitsToMeters.get(self.doc.header.get('$INSUNITS'))
 
     def getArea(self):
         external_polyline, _ = self.get_external_polyline()
         external_polyline = external_polyline.get_points()
-        width = max(external_polyline, key=lambda p: p[0])[0] - min(external_polyline, key=lambda p: p[0])[0]
-        height = max(external_polyline, key=lambda p: p[1])[1] - min(external_polyline, key=lambda p: p[1])[1]
+        width = (max(external_polyline, key=lambda p: p[0])[0] - min(external_polyline, key=lambda p: p[0])[0])*self.convertion
+        height = (max(external_polyline, key=lambda p: p[1])[1] - min(external_polyline, key=lambda p: p[1])[1])*self.convertion
         return width * height
 
     def get_external_polyline(self):
@@ -128,7 +150,7 @@ class DXFAnalyzer:
         for entity in self.msp:
             graphic = self.create_dxf_graphic(entity)
             perimeter += graphic.calculate_perimeter()
-        return perimeter
+        return perimeter*self.convertion
 
     def create_dxf_graphic(self, entity):
         shape = None
@@ -181,6 +203,8 @@ class DXFAnalyzer:
         return False
 
     def verifyFile(self):
+        if self.auditor.has_errors:
+            raise AuditorException()
         externalLine, _ = self.get_external_polyline()
         cola = deque(self.msp)
         while len(cola) > 0:
@@ -237,28 +261,26 @@ class MaterialLibrary:
 
 
 class Calculator:
-    def __init__(self, dxf_analyzer, material_library):
+    def __init__(self, dxf_analyzer):
         self.dxf_analyzer = dxf_analyzer
-        self.material_library = material_library
+
+    def getDiscount(self, amount: int):
+        return biblioteca.get(amount) if biblioteca.get(amount) != None else 0.6
 
     def magancyMargin(self, price):
-        pass
+        return max(-0.0000012*price + 0.6, 0.3)
 
     def calculate_price(self, material:Material, amount:int):
         perimeter = self.dxf_analyzer.calculate_perimeter()
-        material_area = self.dxf_analyzer.getArea()/1000000
+        material_area = self.dxf_analyzer.getArea()
         if material:
-            cutting_time = (perimeter / 1000) * material.cutting_speed 
+            cutting_time = perimeter * material.cutting_speed 
             material_cost = material_area * material.sheet_value
-            discount = 0
-            if amount >= 10:
-                discount = 10
-            elif amount >= 5:
-                discount = 5
-            final_price = ((cutting_time * 500) + (material_cost * (1 - discount / 100)))*amount
+            final_price = (material_cost + cutting_time)*amount
+            final_price += final_price*self.magancyMargin(final_price)*(1-self.getDiscount(amount))
+            print(final_price, minBuyValue)
             return max(final_price, minBuyValue)
-        else:
-            return -1
+        return -1
 
 
 # Example usage

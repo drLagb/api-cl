@@ -60,19 +60,19 @@ class ImageService:
                     )
             with open(filePath, "wb") as File:
                 File.write(content)
-            DXFAnalyzer(filePath)
+            DXFAnalyzer(filePath).verifyFile()
             return JSONResponse(
                 content=ImageEntity("success", id).__dict__, 
                 status_code=status.HTTP_201_CREATED
                 )
         except IOError as e:
             return JSONResponse(
-                content=MenssajeEntity("El formato no es compatible"), 
+                content=MenssajeEntity("El formato no es compatible").__dict__, 
                 status_code=status.HTTP_406_NOT_ACCEPTABLE
                 )
         except Exception as e:
             return JSONResponse(
-                content=MenssajeEntity(str(e)), 
+                content=MenssajeEntity(str(e)).__dict__, 
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
