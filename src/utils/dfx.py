@@ -222,14 +222,23 @@ class DXFAnalyzer:
                     raise InterpoleFigureException()
                 
 
-    def draw_dxf(self, filePath:str):
-        fig = plt.figure()
-        ax = fig.add_axes([0, 0, 1, 1])
+    def draw_dxf(self, filePath: str, show: bool = False, dpi: int = 300, line_color: str = "black", background_color: str = "white"):
+        # Crear la figura y el eje
+        fig, ax = plt.subplots()
+        fig.patch.set_facecolor(background_color)
+        ax.set_facecolor(background_color)
         ctx = RenderContext(self.doc)
+        ctx.set_current_layout(self.msp)
+        ctx.set_background(background_color)  # Ajustar el fondo del render
         out = MatplotlibBackend(ax)
-        Frontend(ctx, out).draw_layout(self.msp, finalize=True)
-        fig.savefig(filePath, dpi=300)
-
+        frontend = Frontend(ctx, out)
+        frontend.draw_layout(self.msp, finalize=True)
+        # Mejorar la presentación
+        ax.set_aspect('equal', adjustable='datalim')
+        ax.axis('off')  # Ocultar los ejes
+        plt.title("Vista previa del archivo DXF", color=line_color)
+        # Guardar la imagen
+        fig.savefig(filePath, dpi=dpi, bbox_inches='tight', pad_inches=0)
 
 class Material:
     def __init__(self, name, thickness, cutting_speed, sheet_value):
