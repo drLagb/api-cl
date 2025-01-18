@@ -16,5 +16,5 @@ def delete_image(id:str):
 
 
 @imageRouter.post("")
-async def create_image(uploaded: UploadFile):
-    return await imageService.create_image(uploaded, JSONResponse)
+async def create_file(uploaded: UploadFile):
+    return await imageService.create_file(uploaded, JSONResponse)
