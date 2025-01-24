@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from src.routes.price.priceService import PriceService
 from fastapi.responses import JSONResponse, PlainTextResponse
+from src.utils import db_user
 
 priceRouter = APIRouter(prefix="/price")
 

@@ -287,7 +287,6 @@ class Calculator:
             material_cost = material_area * material.sheet_value
             final_price = (material_cost + cutting_time)*amount
             final_price += final_price*self.magancyMargin(final_price)*(1-self.getDiscount(amount))
-            print(final_price, minBuyValue)
             return max(final_price, minBuyValue)
         return -1
 
@@ -295,6 +294,5 @@ class Calculator:
 # Example usage
 if __name__ == "__main__":
     file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Files", "perchero_polyline_9_2432.7.dxf")
-    print(1)
     dxf_analyzer = DXFAnalyzer(file_path)
     dxf_analyzer.draw_dxf()
