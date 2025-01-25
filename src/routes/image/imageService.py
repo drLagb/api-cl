@@ -77,5 +77,5 @@ class ImageService:
                 )
             
     def create_image(self, filePath, imagepath):
-        dxf = DXFAnalyzer(filePath, verifible=False)
+        dxf = DXFAnalyzer(filePath)
         dxf.draw_dxf(imagepath)
